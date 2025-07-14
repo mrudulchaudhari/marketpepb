@@ -1,5 +1,6 @@
 import pandas as pd
-from datetime import datetime, timedelta
+import datetime
+from datetime import timedelta
 from nsepython import *
 
 SYMBOLS = ["NIFTY 50", "NIFTY MIDCAP 150", "NIFTY SMALLCAP 250", "NIFTY BANK"]
@@ -11,8 +12,8 @@ PERIODS = [20, 40, 60, 120, 250, 500, 750, 1000, 2000, 3000, 4000, 5000, 12000]
 
 def update_nifty_data(symbol, csv_file, csv_historical):
     try:
-        start_date = (datetime.now() - timedelta(days=12000)).strftime("%d-%b-%Y")
-        end_date = datetime.now().strftime("%d-%b-%Y")
+        start_date = (datetime.datetime.now() - timedelta(days=12000)).strftime("%d-%b-%Y")
+        end_date = datetime.datetime.now().strftime("%d-%b-%Y")
         df = index_pe_pb_div(symbol, start_date, end_date)
         df = df.iloc[::-1]
         df["pe"] = pd.to_numeric(df["pe"], errors="coerce")
@@ -48,7 +49,7 @@ def get_report_message():
 
     for symbol, csv_file in zip(SYMBOLS, CSV_FILES):
         last_date, current, averages = analyze_data(csv_file)
-        formatted_date = datetime.strptime(last_date, "%Y-%m-%d").strftime("%-d %B %Y")
+        formatted_date = datetime.datetime.strptime(last_date, "%Y-%m-%d").strftime("%-d %B %Y")
         symbol_message = f"""📊 {symbol} Analysis Report
 📅 Date: {formatted_date}
 

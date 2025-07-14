@@ -48,9 +48,9 @@ def get_report_message():
 
     for symbol, csv_file in zip(SYMBOLS, CSV_FILES):
         last_date, current, averages = analyze_data(csv_file)
-
+        formatted_date = datetime.strptime(last_date, "%Y-%m-%d").strftime("%-d %B %Y")
         symbol_message = f"""📊 {symbol} Analysis Report
-📅 Date: {last_date}
+📅 Date: {formatted_date}
 
 Today's PE*PB: {current}
 

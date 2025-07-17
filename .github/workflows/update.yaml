@@ -18,7 +18,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # fetch full history for pulling
+          fetch-depth: 0  # important to allow pulling
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -28,15 +28,18 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run update script
-        run: python update_data.py
-
-      - name: Commit and push updated CSVs
+      - name: Pull latest changes from main before modifying
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           git fetch origin main
           git pull --rebase origin main
+
+      - name: Run update script
+        run: python update_data.py
+
+      - name: Commit and push updated CSVs
+        run: |
           git add data/*.csv
           git commit -m "Auto-update CSVs [skip ci]" || echo "No changes to commit"
           git push origin main

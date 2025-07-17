@@ -49,25 +49,27 @@ def get_report_message():
 
     for symbol, csv_file in zip(SYMBOLS, CSV_FILES):
         last_date, current, averages = analyze_data(csv_file)
-        formatted_date = datetime.datetime.strptime(last_date, "%Y-%m-%d").strftime("%-d %B %Y")
+        date_obj = datetime.datetime.strptime(last_date, "%Y-%m-%d")
+        formatted_date = f"{date_obj.day} {date_obj.strftime('%B %Y')}"
+
         symbol_message = f"""📊 {symbol} Analysis Report
 📅 Date: {formatted_date}
 
 Today's PE*PB: {current}
 
 Moving Averages:
-20 Days: {averages[20]}
-40 Days: {averages[40]}
-60 Days: {averages[60]}
-120 Days: {averages[120]}
-250 Days: {averages[250]}
-500 Days: {averages[500]}
-750 Days: {averages[750]}
-1000 Days: {averages[1000]}
-2000 Days: {averages[2000]}
-3000 Days: {averages[3000]}
-4000 Days: {averages[4000]}
-5000 Days: {averages[5000]}
+1 Month: {averages[20]}
+2 Month: {averages[40]}
+3 Month: {averages[60]}
+6 Month: {averages[120]}
+1 Year : {averages[250]}
+2 Year : {averages[500]}
+3 Year : {averages[750]}
+4 Year : {averages[1000]}
+8 Year : {averages[2000]}
+12 Year: {averages[3000]}s
+16 Year: {averages[4000]}
+20 Year: {averages[5000]}
 All time Average: {averages[12000]}
 """
         message_parts.append(symbol_message)

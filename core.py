@@ -67,7 +67,7 @@ Moving Averages:
 3 Year : {averages[750]}
 4 Year : {averages[1000]}
 8 Year : {averages[2000]}
-12 Year: {averages[3000]}s
+12 Year: {averages[3000]}
 16 Year: {averages[4000]}
 20 Year: {averages[5000]}
 All time Average: {averages[12000]}

@@ -2,18 +2,23 @@ name: Daily NSE Update
 
 on:
   schedule:
-    - cron: '30 13 * * *'  # 7:00 PM IST = 1:30 PM UTC
+    - cron: '30 13 * * *'  # 7:00 PM IST
+    - cron: '0 15 * * *'   # 8:30 PM IST
+    - cron: '30 16 * * *'  # 10:00 PM IST
+    - cron: '30 2 * * *'   # 8:00 AM IST
   workflow_dispatch:
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # ✅ Needed to push changes back
+      contents: write
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # fetch full history for pulling
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -30,6 +35,8 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
+          git fetch origin main
+          git pull --rebase origin main
           git add data/*.csv
           git commit -m "Auto-update CSVs [skip ci]" || echo "No changes to commit"
-          git push
+          git push origin main

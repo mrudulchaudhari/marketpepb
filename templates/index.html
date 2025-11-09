@@ -6,27 +6,38 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            padding: 30px;
-            font-size: 20px; /* 🔼 Increase this value to make text larger */
-            line-height: 1.6;
+            padding: 40px;
+            font-size: 20px; /* Good readable size */
+            line-height: 1.7;
+            color: #222;
         }
 
         pre {
             background-color: #fff;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             white-space: pre-wrap;
             word-wrap: break-word;
+            font-family: inherit; /* Keeps consistent with body font */
         }
 
         h1 {
-            font-size: 28px; /* 🔼 You can increase heading size too */
+            font-size: 32px;
+            color: #007bff;
+            margin-bottom: 25px;
+        }
+
+        .timestamp {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>📈 NSE Daily PE*PB Analysis</h1>
-    <pre>{{ report }}</pre>
+    <h1>📈 NSE Daily PE×PB Analysis</h1>
+    <div class="timestamp">Last updated: {{ now }}</div>
+    <pre>{{ report | replace('\n', '<br>') | safe }}</pre>
 </body>
 </html>

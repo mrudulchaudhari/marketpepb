@@ -3,10 +3,9 @@ import datetime
 from datetime import timedelta
 from nsepython import *
 
-SYMBOLS = ["NIFTY 50", "NIFTY MIDCAP 150", "NIFTY SMALLCAP 250", "NIFTY BANK"]
-CSV_FILES = ["data/df_nifty50.csv", "data/df_niftymidcap.csv", "data/df_niftysmallcap.csv", "data/df_niftybank.csv"]
-CSV_HISTORICAL = ["data/NIFTY 50_Historical.csv", "data/NIFTY MIDCAP 150_Historical.csv",
-                  "data/NIFTY SMALLCAP250_Historical.csv", "data/NIFTY BANK_Historical.csv"]
+SYMBOLS = ["NIFTY 50", "NIFTY MIDCAP 150", "NIFTY BANK"]
+CSV_FILES = ["data/df_nifty50.csv", "data/df_niftymidcap.csv", "data/df_niftybank.csv"]
+CSV_HISTORICAL = ["data/NIFTY 50_Historical.csv", "data/NIFTY MIDCAP 150_Historical.csv", "data/NIFTY BANK_Historical.csv"]
 PERIODS = [20, 40, 60, 120, 250, 500, 750, 1000, 2000, 3000, 4000, 5000, 12000]
 
 

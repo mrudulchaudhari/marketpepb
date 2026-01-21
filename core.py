@@ -3,11 +3,20 @@ import datetime
 from datetime import timedelta
 from nsepython import *
 
-SYMBOLS = ["NIFTY 50", "NIFTY MIDCAP 150", "NIFTY SMALLCAP 250", "NIFTY BANK"]
-CSV_FILES = ["data/df_nifty50.csv", "data/df_niftymidcap.csv", "data/df_niftysmallcap.csv", "data/df_niftybank.csv"]
-CSV_HISTORICAL = ["data/NIFTY 50_Historical.csv", "data/NIFTY MIDCAP 150_Historical.csv",
-                  "data/NIFTY SMALLCAP250_Historical.csv", "data/NIFTY BANK_Historical.csv"]
-PERIODS = [20, 40, 60, 120, 250, 500, 750, 1000, 2000, 3000, 4000, 5000, 12000]
+SYMBOLS = ['NIFTY 50', 'NIFTY NEXT 50', 'NIFTY BANK', 'NIFTY FIN SERVICE', 'NIFTY MID SELECT']
+CSV_FILES = ["data/df_nifty50.csv",
+             "data/df_nifty_next_50.csv",
+             "data/df_niftybank.csv",
+             "data/df_nifty_fin_service.csv",
+             "data/df_nifty_mid_select.csv"
+             ]
+CSV_HISTORICAL = ["data/NIFTY 50_Historical.csv",
+                  "data/NIFTY NEXT_50_Historical.csv",
+                  "data/NIFTY BANK_Historical.csv",
+                  "data/NIFTY FIN SERVICE_Historical.csv",
+                  "data/NIFTY MID Select_Historical.csv"
+                  ]
+PERIODS = [20, 40, 60, 120, 250, 500, 750, 1000, 2000, 3000, 4000, 5000]
 
 
 def update_nifty_data(symbol, csv_file, csv_historical):
@@ -38,10 +47,13 @@ def analyze_data(csv_file):
     df = df.sort_values(by="DATE", ascending=True)
     df.set_index("DATE", inplace=True)
 
-    last_date = df.index[-1].strftime("%Y-%m-%d")
+    last_date = df.index[-1]
+    extended_date = (last_date + timedelta(days=3)).strftime("%Y-%m-%d")
+    last_date = last_date.strftime("%Y-%m-%d")
     current = round(float(df["pe*pb"].tail(1).values[0]), 2)
     averages = {p: round(df["pe*pb"].tail(p).mean(), 2) for p in PERIODS}
-    return last_date, current, averages
+    averages["all_time"] = round(df['pe*pb'].mean(), 2)
+    return last_date, current, averages, extended_date
 
 
 def get_report_message():
@@ -49,11 +61,15 @@ def get_report_message():
 
     for symbol, csv_file in zip(SYMBOLS, CSV_FILES):
         # analyze_data returns last_date, current, averages
-        last_date, current, averages = analyze_data(csv_file)
+        last_date, current, averages, extended_date = analyze_data(csv_file)
 
         # Portable date formatting (works on Windows and Unix)
         formatted_date = datetime.datetime.strptime(last_date, "%Y-%m-%d").strftime("%d %B %Y").lstrip("0")
-
+        price_df = index_history(symbol, last_date, extended_date)
+        current_price = (
+            price_df["CLOSE"].iloc[-1]
+            if not price_df.empty else "N/A"
+        )
         # Get recommendation for this csv_file (expects buying_recommendation to return a dict with 'recommendation')
         # If you used the earlier function it returns a dict; adapt if your function returns a plain string.
         rec = buying_recommendation(csv_file)
@@ -66,7 +82,7 @@ def get_report_message():
         symbol_message = f"""📊 {symbol} Analysis Report
 📅 Date: {formatted_date}
 
-Today's PE*PB: {current} — {rec_text}
+Today's PE*PB: {current}  |  Last Closing Value : {current_price} — {rec_text}
 
 Moving Averages:
 20 Days: {averages[20]}
@@ -81,7 +97,7 @@ Moving Averages:
 3000 Days: {averages[3000]}
 4000 Days: {averages[4000]}
 5000 Days: {averages[5000]}
-All time Average: {averages[12000]}
+All time Average: {averages['all_time']}
 """
         message_parts.append(symbol_message)
 
@@ -107,8 +123,17 @@ def buying_recommendation(csv_file):
             deviation = ((current - avg) / avg) * 100
             deviations[p] = round(deviation, 2)
 
+    averages["all_time"] = df["pe*pb"].mean()
+
+    if averages["all_time"] and not pd.isna(averages["all_time"]):
+        deviations["all_time"] = round(
+            ((current - averages["all_time"]) / averages["all_time"]) * 100, 2
+        )
+    else:
+        deviations["all_time"] = None
+
     # Periods we want to check for the decision (up to 1000 days + all-time)
-    check_periods = [20, 40, 60, 120, 250, 500, 750, 1000, 12000]
+    check_periods = [20, 40, 60, 120, 250, 500, 750, 1000, 'all_time']
     # Use only available deviations (skip None)
     available_check_values = [deviations[p] for p in check_periods if deviations.get(p) is not None]
 
@@ -134,6 +159,19 @@ def buying_recommendation(csv_file):
         "averages": {p: (round(averages[p], 2) if (averages[p] is not None and not pd.isna(averages[p])) else None) for p in PERIODS},
         "deviations": deviations
     }
+
+
+if __name__ == "__main__":
+    # Ensure data directory exists
+    import os
+    os.makedirs("data", exist_ok=True)
+
+    # Step 1: Create / update CSVs (RUNS FIRST)
+    for symbol, csv_file, csv_hist in zip(SYMBOLS, CSV_FILES, CSV_HISTORICAL):
+        update_nifty_data(symbol, csv_file, csv_hist)
+
+    # Step 2: Generate report (READS CSVs)
+    print(get_report_message())
 
 
 

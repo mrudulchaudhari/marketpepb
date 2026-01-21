@@ -10,7 +10,5 @@ def home():
     now = datetime.datetime.now().strftime("%d %B %Y, %I:%M %p")
     return render_template('index.html', report=report, now=now)
 
-
-
 if __name__ == '__main__':
     app.run(debug=True)

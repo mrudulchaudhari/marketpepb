@@ -56,6 +56,12 @@ def analyze_data(csv_file):
     return last_date, current, averages, extended_date
 
 
+def pct(current, avg):
+    if avg is None or avg == 0:
+        return "N/A"
+    return f"{((current - avg) / avg) * 100:.2f}%"
+
+
 def get_report_message():
     message_parts = []
 
@@ -85,9 +91,9 @@ def get_report_message():
 Today's PE*PB: {current}  |  Last Closing Value : {current_price} — {rec_text}
 
 Moving Averages:
-20 Days: {averages[20]}
-40 Days: {averages[40]}
-60 Days: {averages[60]}
+20 Days: {averages[20]}  ({pct(current, averages[20])})
+40 Days: {averages[40]}  ({pct(current, averages[40])})
+60 Days: {averages[60]}  ({pct(current, averages[60])})
 120 Days: {averages[120]}
 250 Days: {averages[250]}
 500 Days: {averages[500]}

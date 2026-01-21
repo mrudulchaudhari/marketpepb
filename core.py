@@ -97,8 +97,7 @@ Moving Averages:
 3000 Days: {averages[3000]}
 4000 Days: {averages[4000]}
 5000 Days: {averages[5000]}
-All time Average: {averages['all_time']}
-"""
+All time Average: {averages['all_time']}"""
         message_parts.append(symbol_message)
 
     return "\n\n".join(message_parts)
@@ -123,6 +122,7 @@ def buying_recommendation(csv_file):
             deviation = ((current - avg) / avg) * 100
             deviations[p] = round(deviation, 2)
 
+
     averages["all_time"] = df["pe*pb"].mean()
 
     if averages["all_time"] and not pd.isna(averages["all_time"]):
@@ -134,6 +134,7 @@ def buying_recommendation(csv_file):
 
     # Periods we want to check for the decision (up to 1000 days + all-time)
     check_periods = [20, 40, 60, 120, 250, 500, 750, 1000, 'all_time']
+
     # Use only available deviations (skip None)
     available_check_values = [deviations[p] for p in check_periods if deviations.get(p) is not None]
 
@@ -172,6 +173,4 @@ if __name__ == "__main__":
 
     # Step 2: Generate report (READS CSVs)
     print(get_report_message())
-
-
 

@@ -30,7 +30,9 @@ def update_nifty_data(symbol, csv_file, csv_historical):
         df["pe*pb"] = df["pe"] * df["pb"]
 
         df_historical = pd.read_csv(csv_historical)
-        df_combined = pd.concat([df_historical, df[df_historical.columns]], ignore_index=True)
+        # Filter out empty or all-NA entries before concatenation to avoid FutureWarning
+        df_to_concat = df[df_historical.columns].dropna(how='all')
+        df_combined = pd.concat([df_historical, df_to_concat], ignore_index=True)
         df_combined = df_combined.drop_duplicates(subset=['DATE'])
         df_combined["DATE"] = pd.to_datetime(df_combined["DATE"])
         df_combined = df_combined.sort_values("DATE")
@@ -71,11 +73,17 @@ def get_report_message():
 
         # Portable date formatting (works on Windows and Unix)
         formatted_date = datetime.datetime.strptime(last_date, "%Y-%m-%d").strftime("%d %B %Y").lstrip("0")
-        price_df = index_history(symbol, last_date, extended_date)
-        current_price = (
-            price_df["CLOSE"].iloc[-1]
-            if not price_df.empty else "N/A"
-        )
+
+        # Try to fetch current price with error handling for API issues
+        try:
+            price_df = index_history(symbol, last_date, extended_date)
+            current_price = (
+                price_df["CLOSE"].iloc[-1]
+                if not price_df.empty else "N/A"
+            )
+        except Exception as e:
+            print(f"Warning: Could not fetch price for {symbol}: {e}")
+            current_price = "N/A"
         # Get recommendation for this csv_file (expects buying_recommendation to return a dict with 'recommendation')
         # If you used the earlier function it returns a dict; adapt if your function returns a plain string.
         rec = buying_recommendation(csv_file)

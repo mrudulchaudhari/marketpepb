@@ -88,8 +88,9 @@ def _new_session():
     return session
 
 
-def _normalize_pepb_columns(df):
-    """Map whatever NSE's raw field names are to old-style lowercase columns."""
+def _normalize_pepb_columns(df, symbol):
+    """Map whatever NSE's raw field names are to your exact old-style columns:
+    Index Name, DATE, pe, pb, divYield (pe*pb is computed separately)."""
     rename_map = {}
     for col in df.columns:
         key = col.strip().lower().replace(" ", "").replace("/", "").replace("_", "")
@@ -100,8 +101,17 @@ def _normalize_pepb_columns(df):
         elif key in ("pb", "indexpb"):
             rename_map[col] = "pb"
         elif "div" in key:
-            rename_map[col] = "div"
-    return df.rename(columns=rename_map)
+            rename_map[col] = "divYield"
+        elif key in ("indexname", "name"):
+            rename_map[col] = "Index Name"
+
+    df = df.rename(columns=rename_map)
+
+    if "Index Name" not in df.columns:
+        df["Index Name"] = symbol
+
+    keep_cols = [c for c in ["Index Name", "DATE", "pe", "pb", "divYield"] if c in df.columns]
+    return df[keep_cols]
 
 
 def fetch_pe_pb_div(symbol, start_date, end_date, retries=3, backoff=5):
@@ -130,7 +140,7 @@ def fetch_pe_pb_div(symbol, start_date, end_date, retries=3, backoff=5):
                 raise ValueError("NSE returned an empty record set")
 
             df = pd.DataFrame.from_records(records)
-            df = _normalize_pepb_columns(df)
+            df = _normalize_pepb_columns(df, symbol)
 
             if "DATE" not in df.columns or "pe" not in df.columns or "pb" not in df.columns:
                 raise ValueError(f"Could not find DATE/pe/pb in response columns: {list(df.columns)}")
